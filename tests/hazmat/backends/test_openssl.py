@@ -123,6 +123,16 @@ class TestOpenSSL(object):
         assert ctx != backend._ffi.NULL
         backend._lib.SSL_CTX_free(ctx)
 
+    @pytest.mark.skipif(
+        backend._lib.Cryptography_HAS_PROTOCOL_SETTERS == 0,
+        reason="Requires OpenSSL >= 1.1.0",
+    )
+    def test_ssl_ctx_setters(self):
+        meth = backend._lib.SSLv23_method()
+        ctx = backend._lib.SSL_CTX_new(meth)
+        assert ctx != backend._ffi.NULL
+        
+
     def test_evp_ciphers_registered(self):
         cipher = backend._lib.EVP_get_cipherbyname(b"aes-256-cbc")
         assert cipher != backend._ffi.NULL

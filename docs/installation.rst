@@ -10,7 +10,7 @@ You can install ``cryptography`` with ``pip``:
 Supported platforms
 -------------------
 
-Currently we test ``cryptography`` on Python 2.7, 3.5+,
+Currently we test ``cryptography`` on Python 2.7, 3.6+,
 PyPy 7.3.1, and PyPy3 7.3.1 on these operating systems.
 
 * x86-64 CentOS 7.x
@@ -27,14 +27,9 @@ PyPy 7.3.1, and PyPy3 7.3.1 on these operating systems.
 We test compiling with ``clang`` as well as ``gcc`` and use the following
 OpenSSL releases:
 
-* ``OpenSSL 1.0.2-latest``
 * ``OpenSSL 1.1.0-latest``
 * ``OpenSSL 1.1.1-latest``
 
-.. warning::
-
-    Cryptography 3.2 has dropped support for OpenSSL 1.0.2, see the
-    :doc:`FAQ </faq>` for more details
 
 Building cryptography on Windows
 --------------------------------
@@ -50,7 +45,7 @@ just run
 If you prefer to compile it yourself you'll need to have OpenSSL installed.
 You can compile OpenSSL yourself as well or use `a binary distribution`_.
 Be sure to download the proper version for your architecture and Python
-(VC2010 works for Python 2.7 while VC2015 is required for 3.5 and above).
+(VC2010 works for Python 2.7 while VC2015 is required for 3.6 and above).
 Wherever you place your copy of OpenSSL you'll need to set the ``LIB`` and ``INCLUDE``
 environment variables to include the proper locations. For example:
 

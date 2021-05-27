@@ -1,17 +1,56 @@
 Changelog
 =========
 
-.. _v3-2:
+.. _v3-3:
 
-3.2 - `master`_
+3.3 - `master`_
 ~~~~~~~~~~~~~~~
 
 .. note:: This version is not yet released and is under active development.
 
+* **BACKWARDS INCOMPATIBLE:** Support for Python 3.5 has been removed due to
+  low usage and maintenance burden.
+* **BACKWARDS INCOMPATIBLE:** The
+  :class:`~cryptography.hazmat.primitives.ciphers.modes.GCM` and
+  :class:`~cryptography.hazmat.primitives.ciphers.aead.AESGCM` now require
+  64-bit to 1024-bit (8 byte to 128 byte) initialization vectors. This change
+  is to conform with an upcoming OpenSSL release that will no longer support
+  sizes outside this window.
+* **BACKWARDS INCOMPATIBLE:** When deserializing asymmetric keys we now
+  raise ``ValueError`` rather than ``UnsupportedAlgorithm`` when an
+  unsupported cipher is used. This change is to conform with an upcoming
+  OpenSSL release that will no longer distinguish between error types.
+* **BACKWARDS INCOMPATIBLE:** We no longer allow loading of finite field
+  Diffie-Hellman parameters of less than 512 bits in length. This change is to
+  conform with an upcoming OpenSSL release that no longer supports smaller
+  sizes. These keys were already wildly insecure and should not have been used
+  in any application outside of testing.
+* Python 2 support is deprecated in ``cryptography``. This is the last release
+  that will support Python 2.
+
+.. _v3-2-1:
+
+3.2.1 - 2020-10-27
+~~~~~~~~~~~~~~~~~~
+
+* Disable blinding on RSA public keys to address an error with some versions
+  of OpenSSL.
+
+.. _v3-2:
+
+3.2 - 2020-10-25
+~~~~~~~~~~~~~~~~
+
+* **SECURITY ISSUE:** Attempted to make RSA PKCS#1v1.5 decryption more constant
+  time, to protect against Bleichenbacher vulnerabilities. Due to limitations
+  imposed by our API, we cannot completely mitigate this vulnerability and a
+  future release will contain a new API which is designed to be resilient to
+  these for contexts where it is required. Credit to **Hubert Kario** for
+  reporting the issue. *CVE-2020-25659*
 * Support for OpenSSL 1.0.2 has been removed. Users on older version of OpenSSL
   will need to upgrade.
-* Added basic support for SMIME signing via
-  :class:`~cryptography.hazmat.primitives.smime.SMIMESignatureBuilder`.
+* Added basic support for PKCS7 signing (including SMIME) via
+  :class:`~cryptography.hazmat.primitives.serialization.pkcs7.PKCS7SignatureBuilder`.
 
 .. _v3-1-1:
 

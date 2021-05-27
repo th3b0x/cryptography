@@ -11,7 +11,7 @@ jobs:
     container: ${{ matrix.MANYLINUX.CONTAINER }}
     strategy:
       matrix:
-        PYTHON: ["cp27-cp27m", "cp27-cp27mu", "cp35-cp35m"]
+        PYTHON: ["cp27-cp27m", "cp27-cp27mu", "cp36-cp36m"]
         MANYLINUX:
           - NAME: manylinux1_x86_64
             CONTAINER: "pyca/cryptography-manylinux1:x86_64"
@@ -62,12 +62,12 @@ jobs:
             DOWNLOAD_URL: 'https://www.python.org/ftp/python/2.7.17/python-2.7.17-macosx10.9.pkg'
             BIN_PATH: '/Library/Frameworks/Python.framework/Versions/2.7/bin/python'
           - VERSION: '3.8'
-            ABI_VERSION: '3.5'
+            ABI_VERSION: '3.6'
             DOWNLOAD_URL: 'https://www.python.org/ftp/python/3.8.2/python-3.8.2-macosx10.9.pkg'
             BIN_PATH: '/Library/Frameworks/Python.framework/Versions/3.8/bin/python3'
     name: "${{ matrix.PYTHON.VERSION }} ABI ${{ matrix.PYTHON.ABI_VERSION }} macOS"
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - run: |
           curl "$PYTHON_DOWNLOAD_URL" -o python.pkg
           sudo installer -pkg python.pkg -target /
@@ -76,7 +76,7 @@ jobs:
       - run: ${{ matrix.PYTHON.BIN_PATH }} -m pip install -U virtualenv requests
       - name: Download OpenSSL
         run: |
-            ${{ matrix.PYTHON.BIN_PATH }} .github/workflows/download_openssl.py macos openssl-macos
+            ${{ matrix.PYTHON.BIN_PATH }} .github/workflows/download_openssl.py macos openssl-macos-x86-64
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -92,8 +92,8 @@ jobs:
 
           cd cryptography*
           CRYPTOGRAPHY_SUPPRESS_LINK_FLAGS="1" \
-              LDFLAGS="${HOME}/openssl-macos/lib/libcrypto.a ${HOME}/openssl-macos/lib/libssl.a" \
-              CFLAGS="-I${HOME}/openssl-macos/include -mmacosx-version-min=10.10 -march=core2" \
+              LDFLAGS="${HOME}/openssl-macos-x86-64/lib/libcrypto.a ${HOME}/openssl-macos-x86-64/lib/libssl.a" \
+              CFLAGS="-I${HOME}/openssl-macos-x86-64/include -mmacosx-version-min=10.10 -march=core2" \
               ../venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/cryptography*.whl ../wheelhouse
       - run: venv/bin/pip install -f wheelhouse --no-index cryptography
       - run: |
@@ -101,7 +101,7 @@ jobs:
 
       - run: mkdir cryptography-wheelhouse
       - run: mv wheelhouse/cryptography*.whl cryptography-wheelhouse/
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2.2.0
         with:
           name: "cryptography-${{ github.event.inputs.version }}-macOS-${{ matrix.PYTHON.ABI_VERSION }}"
           path: cryptography-wheelhouse/
@@ -115,14 +115,10 @@ jobs:
           - {ARCH: 'x64', WINDOWS: 'win64'}
         PYTHON:
           - {VERSION: "2.7", MSVC_VERSION: "2010"}
-          - {VERSION: "3.5", MSVC_VERSION: "2019"}
-          - {VERSION: "3.6", MSVC_VERSION: "2019"}
-          - {VERSION: "3.7", MSVC_VERSION: "2019"}
-          - {VERSION: "3.8", MSVC_VERSION: "2019"}
           - {VERSION: "3.8", MSVC_VERSION: "2019", "USE_ABI3": "true", "ABI_VERSION": "cp36"}
     name: "${{ matrix.PYTHON.VERSION }} ${{ matrix.WINDOWS.WINDOWS }} ${{ matrix.PYTHON.ABI_VERSION }}"
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - name: Setup python
         uses: actions/setup-python@v2
         with:
@@ -159,7 +155,7 @@ jobs:
 
       - run: mkdir cryptography-wheelhouse
       - run: move wheelhouse\cryptography*.whl cryptography-wheelhouse\
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2.2.0
         with:
           name: "cryptography-${{ github.event.inputs.version }}-${{ matrix.WINDOWS.WINDOWS }}-${{ matrix.PYTHON.VERSION }}-${{ matrix.PYTHON.ABI_VERSION}}"
           path: cryptography-wheelhouse\

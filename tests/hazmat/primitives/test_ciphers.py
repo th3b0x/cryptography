@@ -72,6 +72,13 @@ class TestAESXTS(object):
             ciphers.Cipher(AES(b"0" * 16), modes.XTS(b"0" * 16), backend)
 
 
+class TestGCM(object):
+    @pytest.mark.parametrize("size", [7, 129])
+    def test_gcm_min_max(self, size):
+        with pytest.raises(ValueError):
+            modes.GCM(b"0" * size)
+
+
 class TestCamellia(object):
     @pytest.mark.parametrize(
         ("key", "keysize"),
@@ -333,3 +340,12 @@ class TestCipherUpdateInto(object):
         decbuf = bytearray(527)
         decprocessed = decryptor.update_into(buf[:processed], decbuf)
         assert decbuf[:decprocessed] == pt
+
+    def test_max_chunk_size_fits_in_int32(self, backend):
+        # max chunk must fit in signed int32 or else a call large enough to
+        # cause chunking will result in the very OverflowError we want to
+        # avoid with chunking.
+        key = b"\x00" * 16
+        c = ciphers.Cipher(AES(key), modes.ECB(), backend)
+        encryptor = c.encryptor()
+        backend._ffi.new("int *", encryptor._ctx._MAX_CHUNK_SIZE)

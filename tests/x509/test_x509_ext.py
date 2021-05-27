@@ -5679,10 +5679,35 @@ class TestPrecertificateSignedCertificateTimestampsExtension(object):
         )
 
     @pytest.mark.supported(
-        only_if=lambda backend: (
-            not backend._lib.CRYPTOGRAPHY_OPENSSL_110_OR_GREATER
-        ),
-        skip_message="Requires OpenSSL < 1.1.0",
+        only_if=lambda backend: (backend._lib.Cryptography_HAS_SCT),
+        skip_message="Requires CT support",
+    )
+    def test_generate(self, backend):
+        cert = _load_cert(
+            os.path.join("x509", "badssl-sct.pem"),
+            x509.load_pem_x509_certificate,
+            backend,
+        )
+        scts = cert.extensions.get_extension_for_class(
+            x509.PrecertificateSignedCertificateTimestamps
+        ).value
+        assert len(scts) == 1
+        [sct] = scts
+
+        private_key = RSA_KEY_2048.private_key(backend)
+        builder = _make_certbuilder(private_key).add_extension(
+            x509.PrecertificateSignedCertificateTimestamps([sct]),
+            critical=False,
+        )
+        cert = builder.sign(private_key, hashes.SHA256(), backend)
+        ext = cert.extensions.get_extension_for_class(
+            x509.PrecertificateSignedCertificateTimestamps
+        ).value
+        assert list(ext) == [sct]
+
+    @pytest.mark.supported(
+        only_if=lambda backend: backend._lib.CRYPTOGRAPHY_IS_LIBRESSL,
+        skip_message="Requires LibreSSL",
     )
     def test_skips_scts_if_unsupported(self, backend):
         cert = _load_cert(
